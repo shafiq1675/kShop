@@ -17,16 +17,43 @@ namespace kShop.Controllers
 
         // GET: api/<CustomerController>
         [HttpGet]
-        public IEnumerable<string> Get()
+        public Response Get()
         {
-            return new string[] { "value1", "value2" };
+            using (var _db = new kShopContext())
+            {
+                try
+                {
+                    
+                    res = new Response() { Data = _db.Customers.ToList(), Message = "Success", Status = 200, ResponseTime = DateTime.Now };
+                }
+                catch (Exception ex)
+                {
+                    res = new Response() { Data = null, Message = ex.Message, Status = 500, ResponseTime = DateTime.Now };
+
+                }
+
+                return res;
+            }
         }
 
         // GET api/<CustomerController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public Response Get(int id)
         {
-            return "value";
+            using (var _db = new kShopContext())
+            {
+                try
+                {
+
+                    res = new Response() { Data = _db.Customers.Find(id), Message = "Success", Status = 200, ResponseTime = DateTime.Now };
+                }
+                catch (Exception ex)
+                {
+                    res = new Response() { Data = null, Message = ex.Message, Status = 500, ResponseTime = DateTime.Now };
+
+                }
+                return res;
+            }
         }
 
         // POST api/<CustomerController>
@@ -37,9 +64,21 @@ namespace kShop.Controllers
             {
                 try
                 {
-                    _db.Add(value);
-                    _db.SaveChanges();
-                     res = new Response() { Data = null, Message = "Success", Status = 200, ResponseTime = DateTime.Now };
+                    if(_db.Customers.Any(o=>o.CustomerId == value.CustomerId))
+                    {
+                        _db.Update(value);
+                        _db.SaveChanges();
+                        res = new Response() { Data = null, Message = "Update Success", Status = 200, ResponseTime = DateTime.Now };
+
+                    }
+                    else
+                    {
+                        _db.Add(value);
+                        _db.SaveChanges();
+                        res = new Response() { Data = null, Message = "Save Success", Status = 200, ResponseTime = DateTime.Now };
+
+                    }
+
                 }
                 catch(Exception ex)
                 {
